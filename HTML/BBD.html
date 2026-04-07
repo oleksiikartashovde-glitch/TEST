@@ -1,1 +1,1609 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Before Diagnosis — Full Framework Visualisation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap');
+
+:root {
+–bg: #080a10;
+–surface: #0f1118;
+–surface2: #161a24;
+–surface3: #1e2230;
+–border: #252836;
+–border2: #2e3347;
+–text: #dde0ee;
+–muted: #5d6480;
+–muted2: #7a82a0;
+–gold: #d4a843;
+–gold2: #f0c96a;
+–blue: #5b9bd5;
+–blue2: #7ab8f0;
+–green: #4db87a;
+–green2: #6dd898;
+–red: #c45c5c;
+–red2: #e07a7a;
+–purple: #9b6bd4;
+–purple2: #bb8ef0;
+–orange: #d4834b;
+–orange2: #f0a068;
+–pink: #c45c84;
+–teal: #4baa9b;
+–teal2: #6dcfbe;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Outfit’, sans-serif;
+font-size: 14px;
+line-height: 1.6;
+min-height: 100vh;
+}
+
+/* Noise texture overlay */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘0.04’/%3E%3C/svg%3E”);
+pointer-events: none;
+z-index: 0;
+opacity: 0.5;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 0 32px 60px; }
+
+/* ===== HEADER ===== */
+.page-header {
+padding: 56px 0 40px;
+border-bottom: 1px solid var(–border);
+margin-bottom: 40px;
+position: relative;
+}
+.page-header::after {
+content: ‘’;
+position: absolute;
+bottom: -1px; left: 0;
+width: 120px; height: 2px;
+background: linear-gradient(90deg, var(–gold), transparent);
+}
+.header-eyebrow {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.65rem;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 0.14em;
+margin-bottom: 14px;
+}
+.header-eyebrow span { color: var(–gold); }
+h1 {
+font-family: ‘Playfair Display’, serif;
+font-size: clamp(2.4rem, 5vw, 4rem);
+font-weight: 700;
+color: var(–text);
+letter-spacing: -0.02em;
+line-height: 1.08;
+margin-bottom: 10px;
+}
+h1 em { color: var(–gold); font-style: italic; }
+.header-sub {
+font-size: 0.9rem;
+color: var(–muted2);
+font-style: italic;
+font-family: ‘Playfair Display’, serif;
+}
+
+/* ===== SECTION HEADERS ===== */
+.sec {
+margin-bottom: 36px;
+}
+.sec-head {
+display: flex;
+align-items: baseline;
+gap: 12px;
+margin-bottom: 6px;
+padding-bottom: 10px;
+border-bottom: 1px solid var(–border);
+}
+.sec-num {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.62rem;
+color: var(–muted);
+letter-spacing: 0.08em;
+flex-shrink: 0;
+}
+.sec-title {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.25rem;
+font-weight: 600;
+color: var(–text);
+}
+.sec-tag {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.6rem;
+background: var(–surface2);
+border: 1px solid var(–border2);
+border-radius: 3px;
+padding: 2px 7px;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 0.07em;
+margin-left: auto;
+flex-shrink: 0;
+}
+.sec-desc {
+font-size: 0.84rem;
+color: var(–muted2);
+line-height: 1.65;
+margin-bottom: 16px;
+max-width: 820px;
+}
+
+/* ===== CARDS ===== */
+.card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 16px 18px;
+}
+.card-title {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.65rem;
+text-transform: uppercase;
+letter-spacing: 0.08em;
+color: var(–muted);
+margin-bottom: 10px;
+}
+
+/* ===== FORMULA BOX ===== */
+.formula {
+background: var(–bg);
+border: 1px solid var(–border2);
+border-left: 3px solid var(–gold);
+border-radius: 0 6px 6px 0;
+padding: 12px 16px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.8rem;
+color: var(–muted2);
+white-space: pre-wrap;
+line-height: 2;
+}
+.formula .hl { color: var(–gold2); }
+.formula .hl2 { color: var(–green2); }
+.formula .hl3 { color: var(–purple2); }
+.formula .comment { color: var(–muted); font-style: italic; }
+
+/* ===== INPUT ===== */
+label {
+display: block;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.63rem;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 0.07em;
+margin-bottom: 5px;
+}
+input[type=number], select {
+width: 100%;
+background: var(–surface2);
+border: 1px solid var(–border2);
+border-radius: 5px;
+padding: 8px 10px;
+color: var(–text);
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.85rem;
+transition: border-color 0.15s;
+-moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input:focus, select:focus { outline: none; border-color: var(–gold); }
+
+/* ===== GRIDS ===== */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.g5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+@media(max-width:1100px){ .g5{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:1fr 1fr} }
+@media(max-width:800px){ .g3,.g4,.g5{grid-template-columns:1fr 1fr} }
+@media(max-width:600px){ .g2,.g3,.g4,.g5{grid-template-columns:1fr} }
+
+/* ===== DIVIDER ===== */
+.div {
+height: 1px;
+background: var(–border);
+margin: 44px 0;
+position: relative;
+}
+.div::before {
+content: attr(data-label);
+position: absolute;
+left: 50%; top: 50%;
+transform: translate(-50%,-50%);
+background: var(–bg);
+padding: 0 12px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.6rem;
+color: var(–muted);
+letter-spacing: 0.1em;
+text-transform: uppercase;
+}
+
+/* ===== §0 PROGRAMME PARAMETERS ===== */
+.param-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(170px,1fr));
+gap: 10px;
+margin-bottom: 18px;
+}
+.param-out {
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 12px 14px;
+}
+.param-out .lbl { font-family: ‘JetBrains Mono’, monospace; font-size: 0.62rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.param-out .val { font-family: ‘JetBrains Mono’, monospace; font-size: 1.1rem; font-weight: 600; color: var(–gold2); }
+.param-out.green .val { color: var(–green2); }
+.param-out.red .val { color: var(–red2); }
+.param-out.blue .val { color: var(–blue2); }
+.param-out.purple .val { color: var(–purple2); }
+
+/* ===== §1 SEQUENCING ===== */
+.gap-trio { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+@media(max-width:800px){ .gap-trio{grid-template-columns:1fr} }
+
+.gap-card {
+border-radius: 10px;
+padding: 16px;
+border: 1px solid transparent;
+position: relative;
+overflow: hidden;
+}
+.gap-card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 2px;
+}
+.gap-card.g-red { background: rgba(196,92,92,0.06); border-color: rgba(196,92,92,0.2); }
+.gap-card.g-red::before { background: var(–red); }
+.gap-card.g-orange { background: rgba(212,131,75,0.06); border-color: rgba(212,131,75,0.2); }
+.gap-card.g-orange::before { background: var(–orange); }
+.gap-card.g-blue { background: rgba(91,155,213,0.06); border-color: rgba(91,155,213,0.2); }
+.gap-card.g-blue::before { background: var(–blue); }
+.gap-label { font-family: ‘JetBrains Mono’, monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.gap-card .gap-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; }
+.gap-card .gap-body { font-size: 0.8rem; color: var(–muted2); line-height: 1.55; }
+
+/* ===== SEQUENCE DIAGRAMS ===== */
+.seq-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:800px){ .seq-compare{grid-template-columns:1fr} }
+.seq-label { font-family: ‘JetBrains Mono’, monospace; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+.seq-list { background: var(–surface); border: 1px solid var(–border); border-radius: 10px; overflow: hidden; }
+.seq-item {
+display: grid;
+grid-template-columns: 40px 1fr;
+border-bottom: 1px solid var(–border);
+}
+.seq-item:last-child { border-bottom: none; }
+.seq-n {
+display: flex; align-items: center; justify-content: center;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.75rem;
+color: var(–muted);
+background: var(–surface2);
+border-right: 1px solid var(–border);
+}
+.seq-body { padding: 10px 14px; }
+.seq-body .st { font-size: 0.82rem; font-weight: 500; margin-bottom: 2px; }
+.seq-body .sd { font-size: 0.72rem; color: var(–muted); }
+.seq-item.existing .seq-n { color: var(–blue2); background: rgba(91,155,213,0.06); }
+.seq-item.existing .st { color: var(–blue2); }
+.seq-item.new-i .seq-n { color: var(–green2); background: rgba(77,184,122,0.07); }
+.seq-item.new-i .st { color: var(–green2); }
+.seq-item.warn-i .seq-n { color: var(–red2); background: rgba(196,92,92,0.06); }
+.seq-item.warn-i .st { color: var(–red2); }
+
+/* ===== FLOW CONNECTOR ===== */
+.flow-connector {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0;
+flex-wrap: wrap;
+margin: 16px 0;
+}
+.flow-box {
+background: var(–surface2);
+border: 1px solid var(–border2);
+border-radius: 8px;
+padding: 10px 16px;
+font-size: 0.8rem;
+font-weight: 500;
+text-align: center;
+min-width: 110px;
+}
+.flow-arrow {
+font-size: 0.9rem;
+color: var(–muted);
+padding: 0 8px;
+}
+.flow-op {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.72rem;
+color: var(–gold2);
+padding: 0 4px;
+}
+
+/* ===== §2 BENCHMARKS ===== */
+.bm-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+@media(max-width:1000px){ .bm-grid{grid-template-columns:1fr 1fr} }
+@media(max-width:600px){ .bm-grid{grid-template-columns:1fr} }
+
+.bm-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 16px;
+transition: transform 0.2s;
+}
+.bm-card:hover { transform: translateY(-2px); }
+.bm-level { font-family: ‘JetBrains Mono’, monospace; font-size: 0.6rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.bm-type { font-size: 0.82rem; font-weight: 600; line-height: 1.3; margin-bottom: 8px; }
+.bm-examples { font-size: 0.72rem; color: var(–muted2); margin-bottom: 10px; line-height: 1.4; }
+.bm-range { display: flex; align-items: baseline; gap: 5px; margin-bottom: 6px; flex-wrap: wrap; }
+.bm-lo { font-family: ‘JetBrains Mono’, monospace; font-size: 0.72rem; color: var(–muted); }
+.bm-med { font-family: ‘Playfair Display’, serif; font-size: 1.4rem; line-height: 1; }
+.bm-hi { font-family: ‘JetBrains Mono’, monospace; font-size: 0.72rem; color: var(–muted); }
+.bm-bar { height: 3px; background: var(–border); border-radius: 2px; margin-bottom: 8px; position: relative; overflow: visible; }
+.bm-bar-fill { position: absolute; top:0; height: 3px; border-radius: 2px; opacity: 0.35; }
+.bm-bar-tick { position: absolute; top: -4px; width: 2px; height: 11px; border-radius: 1px; }
+.bm-interp { font-size: 0.73rem; color: var(–muted2); line-height: 1.4; }
+
+/* Decision band */
+.db-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+@media(max-width:900px){ .db-grid{grid-template-columns:1fr 1fr} }
+.db-cell { border-radius: 8px; padding: 14px 15px; border: 1px solid transparent; }
+.db-ratio { font-family: ‘JetBrains Mono’, monospace; font-size: 0.95rem; font-weight: 600; margin-bottom: 5px; }
+.db-meaning { font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; }
+.db-action { font-size: 0.73rem; color: var(–muted2); line-height: 1.4; }
+.db-cell.suspicious { background: rgba(212,131,75,0.08); border-color: rgba(212,131,75,0.22); }
+.db-cell.suspicious .db-ratio { color: var(–orange2); }
+.db-cell.ok { background: rgba(77,184,122,0.07); border-color: rgba(77,184,122,0.2); }
+.db-cell.ok .db-ratio { color: var(–green2); }
+.db-cell.expensive { background: rgba(212,168,67,0.07); border-color: rgba(212,168,67,0.2); }
+.db-cell.expensive .db-ratio { color: var(–gold2); }
+.db-cell.nogo { background: rgba(196,92,92,0.07); border-color: rgba(196,92,92,0.2); }
+.db-cell.nogo .db-ratio { color: var(–red2); }
+
+/* Benchmark calculator */
+.calc-panel {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 18px 20px;
+margin-top: 14px;
+}
+.calc-panel .calc-title { font-family: ‘JetBrains Mono’, monospace; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(–muted); margin-bottom: 14px; }
+.calc-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.calc-out {
+flex: 1;
+min-width: 220px;
+background: var(–bg);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 12px 14px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.8rem;
+line-height: 1.9;
+white-space: pre;
+}
+
+/* ===== §3 CORRECTION LOCUS ===== */
+.cl-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+@media(max-width:1100px){ .cl-grid{grid-template-columns:repeat(3,1fr)} }
+@media(max-width:650px){ .cl-grid{grid-template-columns:1fr 1fr} }
+
+.cl-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 9px;
+padding: 14px 15px;
+transition: transform 0.2s;
+}
+.cl-card:hover { transform: translateY(-2px); }
+.cl-type { font-family: ‘JetBrains Mono’, monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.cl-where { font-size: 0.86rem; font-weight: 600; margin-bottom: 6px; }
+.cl-q { font-size: 0.73rem; font-style: italic; color: var(–muted2); margin-bottom: 8px; line-height: 1.4; }
+.cl-fw { font-family: ‘JetBrains Mono’, monospace; font-size: 0.65rem; padding: 2px 7px; background: var(–surface2); border: 1px solid var(–border); border-radius: 3px; display: inline-block; margin-bottom: 6px; }
+.cl-corr { font-size: 0.72rem; color: var(–muted2); line-height: 1.4; }
+
+/* ===== §4 SHEPARD TRANSFER ===== */
+.transfer-wrap {
+display: grid;
+grid-template-columns: 1fr 280px;
+gap: 20px;
+align-items: start;
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 22px;
+}
+@media(max-width:800px){ .transfer-wrap{grid-template-columns:1fr} }
+.transfer-qs { list-style: none; }
+.transfer-qs li { padding: 9px 0; border-bottom: 1px solid var(–border); font-size: 0.8rem; color: var(–muted2); line-height: 1.5; }
+.transfer-qs li:last-child { border-bottom: none; }
+.transfer-qs li strong { font-family: ‘JetBrains Mono’, monospace; font-size: 0.72rem; color: var(–text); display: block; margin-bottom: 2px; }
+.dist-note {
+font-size: 0.72rem;
+color: var(–muted);
+border: 1px solid var(–border);
+border-left: 2px solid var(–purple);
+border-radius: 0 5px 5px 0;
+padding: 8px 11px;
+margin-top: 12px;
+line-height: 1.5;
+font-style: italic;
+}
+
+/* Sliders */
+.slider-group { margin-bottom: 12px; }
+.slider-group label { margin-bottom: 4px; }
+.slider-row { display: flex; align-items: center; gap: 8px; }
+input[type=range] { flex: 1; accent-color: var(–purple); cursor: pointer; }
+.slider-val { font-family: ‘JetBrains Mono’, monospace; font-size: 0.78rem; color: var(–purple2); width: 22px; text-align: right; }
+.slider-hint { font-size: 0.62rem; color: var(–muted); font-style: italic; margin-top: 2px; }
+
+/* ===== §5 DFR ===== */
+.dfr-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+@media(max-width:700px){ .dfr-grid{grid-template-columns:1fr} }
+.dfr-card { border-radius: 9px; padding: 15px 16px; border: 1px solid transparent; }
+.dfr-ratio { font-family: ‘JetBrains Mono’, monospace; font-size: 1.05rem; font-weight: 600; margin-bottom: 5px; }
+.dfr-interp { font-size: 0.83rem; font-weight: 600; margin-bottom: 5px; }
+.dfr-action { font-size: 0.75rem; color: var(–muted2); line-height: 1.4; }
+.dfr-card.ok { background: rgba(77,184,122,0.07); border-color: rgba(77,184,122,0.2); }
+.dfr-card.ok .dfr-ratio { color: var(–green2); }
+.dfr-card.border-c { background: rgba(212,168,67,0.06); border-color: rgba(212,168,67,0.2); }
+.dfr-card.border-c .dfr-ratio { color: var(–gold2); }
+.dfr-card.bad { background: rgba(196,92,92,0.07); border-color: rgba(196,92,92,0.2); }
+.dfr-card.bad .dfr-ratio { color: var(–red2); }
+
+.dfr-out-panel {
+background: var(–bg);
+border: 1px solid var(–border);
+border-left: 3px solid var(–purple);
+border-radius: 0 6px 6px 0;
+padding: 14px 16px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.8rem;
+line-height: 2;
+white-space: pre;
+color: var(–muted2);
+}
+.dfr-out-panel .hi { color: var(–purple2); }
+
+/* ===== §6 EVIDENCE MAP ===== */
+.ev-list { display: flex; flex-direction: column; gap: 10px; }
+.ev-row {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 13px 15px;
+display: grid;
+grid-template-columns: 190px 1fr 1fr;
+gap: 14px;
+font-size: 0.8rem;
+align-items: start;
+}
+@media(max-width:800px){ .ev-row{grid-template-columns:1fr} }
+.ev-source { font-weight: 600; font-size: 0.78rem; line-height: 1.4; }
+.ev-src-author { font-weight: 400; color: var(–muted2); font-size: 0.72rem; display: block; margin-top: 2px; }
+.ev-col { color: var(–muted2); line-height: 1.5; font-size: 0.77rem; }
+.ev-badge {
+display: inline-block;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.58rem;
+padding: 2px 6px;
+border-radius: 3px;
+text-transform: uppercase;
+letter-spacing: 0.05em;
+margin-bottom: 4px;
+}
+.ev-badge.cited { background: rgba(91,155,213,0.12); color: var(–blue2); border: 1px solid rgba(91,155,213,0.2); }
+.ev-badge.synthesis { background: rgba(212,168,67,0.1); color: var(–gold2); border: 1px solid rgba(212,168,67,0.2); }
+.ev-badge.heuristic { background: rgba(212,131,75,0.1); color: var(–orange2); border: 1px solid rgba(212,131,75,0.2); }
+
+/* ===== §7 BPMS-DREFS ===== */
+.bpms-wrap { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.layer-pill {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.65rem;
+text-transform: uppercase;
+letter-spacing: 0.07em;
+padding: 4px 10px;
+border-radius: 4px;
+display: inline-block;
+}
+.layer-pill.blue-l { background: rgba(91,155,213,0.1); color: var(–blue2); border: 1px solid rgba(91,155,213,0.2); }
+.layer-pill.purple-l { background: rgba(155,107,212,0.1); color: var(–purple2); border: 1px solid rgba(155,107,212,0.2); }
+
+.bpms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:700px){ .bpms-grid{grid-template-columns:1fr} }
+
+.bpms-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 13px 15px;
+display: grid;
+grid-template-columns: 36px 1fr;
+gap: 10px;
+}
+.bpms-letter {
+font-family: ‘Playfair Display’, serif;
+font-size: 1.9rem;
+line-height: 1;
+text-align: center;
+padding-top: 3px;
+}
+.bpms-mod { font-size: 0.78rem; font-weight: 600; margin-bottom: 2px; }
+.bpms-meaning { font-size: 0.73rem; color: var(–muted2); line-height: 1.38; margin-bottom: 4px; }
+.bpms-q { font-size: 0.7rem; font-style: italic; color: var(–muted); line-height: 1.35; }
+.bpms-card.blue-l { border-color: rgba(91,155,213,0.25); }
+.bpms-card.blue-l .bpms-letter { color: var(–blue2); }
+.bpms-card.purple-l { border-color: rgba(155,107,212,0.25); }
+.bpms-card.purple-l .bpms-letter { color: var(–purple2); }
+
+/* ===== §8 WORKED EXAMPLE ===== */
+.we-panel {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 22px 26px;
+}
+.we-list { display: flex; flex-direction: column; }
+.we-item {
+display: grid;
+grid-template-columns: 30px 1fr;
+gap: 12px;
+padding: 11px 0;
+border-bottom: 1px solid var(–border);
+}
+.we-item:last-child { border-bottom: none; }
+.we-num {
+width: 30px; height: 30px;
+border-radius: 50%;
+background: var(–surface2);
+border: 1px solid var(–border);
+display: flex; align-items: center; justify-content: center;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.7rem;
+color: var(–muted2);
+flex-shrink: 0;
+}
+.we-lbl { font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; }
+.we-calc { font-family: ‘JetBrains Mono’, monospace; font-size: 0.8rem; color: var(–gold2); line-height: 1.7; }
+.we-note { font-size: 0.75rem; color: var(–muted2); margin-top: 3px; }
+.verdict {
+display: inline-block;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.72rem;
+padding: 4px 9px;
+border-radius: 4px;
+margin-top: 5px;
+}
+.verdict.green { background: rgba(77,184,122,0.1); border: 1px solid rgba(77,184,122,0.25); color: var(–green2); }
+.verdict.gold { background: rgba(212,168,67,0.1); border: 1px solid rgba(212,168,67,0.25); color: var(–gold2); }
+.verdict.red { background: rgba(196,92,92,0.1); border: 1px solid rgba(196,92,92,0.25); color: var(–red2); }
+
+/* ===== §9 IMPLICATIONS ===== */
+.impl-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+@media(max-width:700px){ .impl-grid{grid-template-columns:1fr} }
+.impl-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 16px 18px;
+position: relative;
+}
+.impl-card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; bottom: 0;
+width: 3px;
+border-radius: 10px 0 0 10px;
+}
+.impl-n { font-family: ‘JetBrains Mono’, monospace; font-size: 0.62rem; color: var(–muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+.impl-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; }
+.impl-body { font-size: 0.79rem; color: var(–muted2); line-height: 1.6; }
+
+/* ===== §10 CONNECTION MAP ===== */
+.conn-map {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 20px;
+overflow-x: auto;
+}
+.conn-row {
+display: flex;
+align-items: center;
+gap: 0;
+margin-bottom: 8px;
+min-width: 700px;
+}
+.conn-node {
+background: var(–surface2);
+border: 1px solid var(–border2);
+border-radius: 6px;
+padding: 8px 12px;
+font-size: 0.78rem;
+font-weight: 500;
+text-align: center;
+flex: 1;
+min-width: 100px;
+}
+.conn-arrow { color: var(–muted); font-size: 0.8rem; padding: 0 6px; flex-shrink: 0; }
+.conn-op { font-family: ‘JetBrains Mono’, monospace; font-size: 0.68rem; color: var(–gold); padding: 0 2px; flex-shrink: 0; }
+.conn-result {
+background: var(–bg);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 8px 14px;
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 0.8rem;
+color: var(–gold2);
+white-space: nowrap;
+}
+
+/* ===== FOOTER ===== */
+footer {
+margin-top: 48px;
+padding-top: 20px;
+border-top: 1px solid var(–border);
+color: var(–muted);
+font-size: 0.72rem;
+font-family: ‘JetBrains Mono’, monospace;
+display: flex;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 8px;
+}
+footer a { color: var(–purple2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer strong { color: var(–muted2); }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){ .wrap{padding:0 14px 40px} }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+
+<div class="page-header">
+  <div class="header-eyebrow">Kartashov, 2026 · <span>Working Paper</span> · Visualisation Framework</div>
+  <h1>Budget Before <em>Diagnosis</em></h1>
+  <div class="header-sub">Applying Established Cost-Analysis Methods to Behaviour Change Design</div>
+</div>
+
+<!-- ===== §0 PROGRAMME PARAMETERS ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§0</span>
+    <span class="sec-title">Programme Parameters — Design-Stage Cost Anchor</span>
+    <span class="sec-tag">Live Calculator</span>
+  </div>
+  <div class="sec-desc">All downstream ratios and verdicts update from these inputs. Enter programme parameters before any design commitment.</div>
+
+  <div class="param-grid" id="param_inputs">
+    <div><label>Total full-loaded budget</label><input type="number" id="p_budget" value="750000" oninput="recalcAll()"></div>
+    <div><label>Target population (N)</label><input type="number" id="p_n" value="5000" oninput="recalcAll()"></div>
+    <div><label>Benchmark median CTP — from §2</label><input type="number" id="p_bm" value="90" oninput="recalcAll()"></div>
+    <div><label>Expected QALY gain per person</label><input type="number" id="p_qaly" value="0.10" step="0.01" oninput="recalcAll()"></div>
+    <div><label>Cost-effectiveness threshold / QALY</label><input type="number" id="p_nice" value="25000" oninput="recalcAll()"></div>
+    <div><label>Programme duration (months)</label><input type="number" id="p_months" value="12" oninput="recalcAll()"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;" id="param_out"></div>
+
+  <!-- Calculation chain visualisation -->
+
+  <div style="margin-top:18px;">
+    <div class="card-title" style="margin-bottom:10px;">Calculation Chain</div>
+    <div class="conn-map">
+      <div class="conn-row" id="chain_ctp"></div>
+      <div class="conn-row" id="chain_ratio"></div>
+      <div class="conn-row" id="chain_maxctp"></div>
+      <div class="conn-row" id="chain_dfr"></div>
+      <div class="conn-row" id="chain_qaly_pp"></div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="Framework Structure"></div>
+
+<!-- ===== §1 SEQUENCING PROBLEM ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§1</span>
+    <span class="sec-title">The Sequencing Problem</span>
+    <span class="sec-tag">Core Argument</span>
+  </div>
+  <div class="sec-desc">In commissioned BCW-based design — where budget and target population are defined before work begins — cost considerations appear at the APEASE stage, <em>after</em> diagnostic investment. This creates a structural gap: design work may produce options that are behaviourally sound but financially incompatible.</div>
+
+  <div class="gap-trio">
+    <div class="gap-card g-red">
+      <div class="gap-label" style="color:var(--red2)">Gap 1 — Sequencing</div>
+      <div class="gap-title">Cost Too Late</div>
+      <div class="gap-body">Cost-feasibility analysis appears at APEASE (late), not before diagnosis (early). In commissioned programmes, budget is known from day one — making this a structural inefficiency.</div>
+    </div>
+    <div class="gap-card g-orange">
+      <div class="gap-label" style="color:var(--orange2)">Gap 2 — Correction Locus</div>
+      <div class="gap-title">Where to Correct?</div>
+      <div class="gap-body">BCW does not require the designer to determine <em>where</em> correction should occur before selecting an intervention. Subject, intervention, system, and economic failure are conflated.</div>
+    </div>
+    <div class="gap-card g-blue">
+      <div class="gap-label" style="color:var(--blue2)">Gap 3 — Mechanism Transfer</div>
+      <div class="gap-title">Activation ≠ Transfer</div>
+      <div class="gap-body">A mechanism activated inside a programme may not transfer to the real-world target context. Distinct from efficacy — the intervention can work internally and still fail externally.</div>
+    </div>
+  </div>
+
+  <div class="seq-compare">
+    <div>
+      <div class="seq-label" style="color:var(--red2);">⚠ Standard BCW Sequence</div>
+      <div class="seq-list">
+        <div class="seq-item existing"><div class="seq-n">1</div><div class="seq-body"><div class="st">Behavioural diagnosis</div><div class="sd">COM-B / TDF — full solution space explored</div></div></div>
+        <div class="seq-item existing"><div class="seq-n">2</div><div class="seq-body"><div class="st">Intervention function selection</div><div class="sd">BCW wheel — all functions considered</div></div></div>
+        <div class="seq-item existing"><div class="seq-n">3</div><div class="seq-body"><div class="st">Delivery mechanisms</div><div class="sd">BCW policy categories</div></div></div>
+        <div class="seq-item warn-i"><div class="seq-n">4</div><div class="seq-body"><div class="st">APEASE — Affordability</div><div class="sd">Cost check here — late. Infeasible designs already generated.</div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="seq-label" style="color:var(--green2);">✓ Proposed Extended Sequence</div>
+      <div class="seq-list">
+        <div class="seq-item new-i"><div class="seq-n">1</div><div class="seq-body"><div class="st">CTP anchor → benchmark ratio</div><div class="sd">Budget ÷ N → feasible complexity levels pre-selected</div></div></div>
+        <div class="seq-item new-i"><div class="seq-n">2</div><div class="seq-body"><div class="st">Correction locus identification</div><div class="sd">Subject / Intervention / System / Economic-operability?</div></div></div>
+        <div class="seq-item existing"><div class="seq-n">3</div><div class="seq-body"><div class="st">COM-B / TDF within constrained space</div><div class="sd">Diagnosis focused on financially viable options only</div></div></div>
+        <div class="seq-item new-i"><div class="seq-n">4</div><div class="seq-body"><div class="st">Transfer assessment</div><div class="sd">Contextual distance: intervention → target-use context</div></div></div>
+        <div class="seq-item existing"><div class="seq-n">5</div><div class="seq-body"><div class="st">APEASE — Affordability as quantitative gate</div><div class="sd">Benchmark ratio 0.6–1.3× check applied</div></div></div>
+        <div class="seq-item new-i"><div class="seq-n">6</div><div class="seq-body"><div class="st">DFR validation</div><div class="sd">CTP vs QALY-derived ceiling — final gate</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§2 · Cost Per Target Person"></div>
+
+<!-- ===== §2 CTP BENCHMARKS ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§2</span>
+    <span class="sec-title">Cost Per Target Person — Benchmark Ranges</span>
+    <span class="sec-tag">Table 1 · Design Filter</span>
+  </div>
+  <div class="sec-desc">CTP = Total full-loaded budget ÷ Planned target population. Benchmarked against published unit costs from comparable programmes. The benchmark ratio converts an abstract CTP into a decision signal. All values are indicative design-stage orientations only.</div>
+
+  <div class="formula" style="margin-bottom:14px;"><span class="hl">CTP</span>              = Total full-loaded budget / Planned target population
+<span class="hl">Benchmark ratio</span>  = Our CTP / Benchmark median CTP
+<span class="hl">Planned budget</span>   = Planned target population × Selected benchmark CTP
+<span class="hl">Net value</span>        = Expected value created − Intervention cost
+<span class="hl">Cost of delay</span>    = Annual loss from failure to achieve target behaviour</div>
+
+  <div class="bm-grid" id="bm_grid"></div>
+
+  <!-- Benchmark ratio calculator -->
+
+  <div class="calc-panel" style="margin-top:14px;">
+    <div class="calc-title">Benchmark Ratio Calculator — live from §0 inputs</div>
+    <div class="calc-row">
+      <div style="min-width:140px"><label>Our CTP</label><input type="number" id="br_ctp" value="150" oninput="calcBR()"></div>
+      <div style="min-width:190px"><label>Benchmark Median — select level</label>
+        <select id="br_level" onchange="calcBR()">
+          <option value="8">Level 1 — Simple (8)</option>
+          <option value="90" selected>Level 2 — Standard (90)</option>
+          <option value="600">Level 3 — Complex (600)</option>
+          <option value="3500">Level 4 — Bespoke (3500)</option>
+        </select>
+      </div>
+      <div class="calc-out" id="br_result">← Enter values above</div>
+    </div>
+  </div>
+
+  <!-- Decision band Table 2 -->
+
+  <div style="margin-top:18px;">
+    <div class="card-title" style="margin-bottom:10px;">Table 2 — CTP Benchmark Decision Band</div>
+    <div class="db-grid">
+      <div class="db-cell suspicious">
+        <div class="db-ratio">&lt; 0.6×</div>
+        <div class="db-meaning">Suspiciously cheap</div>
+        <div class="db-action">Check for missing overhead or structural under-scoping. Low ratio is not a sign of efficiency without verification.</div>
+      </div>
+      <div class="db-cell ok">
+        <div class="db-ratio">0.6× – 1.3×</div>
+        <div class="db-meaning">Within benchmark band ✓</div>
+        <div class="db-action">Proceed. Design is within credible cost territory for its complexity level.</div>
+      </div>
+      <div class="db-cell expensive">
+        <div class="db-ratio">1.3× – 2.0×</div>
+        <div class="db-meaning">Expensive but possibly justified</div>
+        <div class="db-action">Redesign or justify explicitly. High unit cost must be matched by high expected value and a clear delivery rationale.</div>
+      </div>
+      <div class="db-cell nogo">
+        <div class="db-ratio">&gt; 2.0×</div>
+        <div class="db-meaning">Structurally too expensive ✕</div>
+        <div class="db-action">No-go or major redesign required. Cost exceeds any plausible benchmark justification at current scope.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§3 · Correction Locus"></div>
+
+<!-- ===== §3 CORRECTION LOCUS ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§3 / §6</span>
+    <span class="sec-title">Correction Locus — Gap Types</span>
+    <span class="sec-tag">Table 3 · 5 Gap Types</span>
+  </div>
+  <div class="sec-desc">Diagnosis is incomplete until the framework specifies the level at which correction should occur. Four correction levels produce five gap types when the transfer gap is treated as distinct. Conflating these produces mismatched responses.</div>
+
+  <div class="cl-grid" id="cl_grid"></div>
+
+  <!-- Decision flow for gap identification -->
+
+  <div style="margin-top:18px;">
+    <div class="card-title" style="margin-bottom:10px;">Gap Identification Decision Flow</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto;">
+      <div style="min-width:600px;display:flex;flex-direction:column;gap:8px;" id="gap_flow"></div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§4 · Transfer Assessment"></div>
+
+<!-- ===== §4 SHEPARD TRANSFER ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§4 / §7</span>
+    <span class="sec-title">Mechanism Transfer — Shepard-Type Analogue</span>
+    <span class="sec-tag">Transfer Assessment</span>
+  </div>
+  <div class="sec-desc">Activation is not transfer. A mechanism activated within a facilitated programme setting may fail to transfer because contextual cues, social reinforcement, or resources present during the programme are absent in the real-world target context. Contextual distance predicts transfer loss.</div>
+
+  <div class="transfer-wrap">
+    <div>
+      <canvas id="shepCanvas" width="480" height="280"></canvas>
+    </div>
+    <div>
+      <div class="card-title" style="margin-bottom:10px;">Transfer Assessment — 3 Design Questions</div>
+      <ul class="transfer-qs">
+        <li><strong>Q1 — Contextual features</strong>What cues, supports, social structures, and environmental affordances enable the mechanism to operate within the intervention context?</li>
+        <li><strong>Q2 — Feature presence</strong>Which of these features are present in the target-use environment, and which are absent?</li>
+        <li><strong>Q3 — Bridge or redesign?</strong>For each absent feature: is there a design element that can bridge the gap, or does the mechanism require redesign to operate without it?</li>
+      </ul>
+      <div class="dist-note">Shepard (1987): probability of generalisation decays as a function of distance in psychological space. Used here as a structural analogue — not a direct mathematical application.</div>
+    </div>
+  </div>
+
+  <!-- Transfer sliders -->
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">Contextual Distance Estimator</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div id="td_sliders"></div>
+      <div>
+        <div style="font-size:0.77rem;color:var(--muted2);margin-bottom:8px;">Aggregate Transfer Risk</div>
+        <div id="td_result" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:1.9;color:var(--muted2);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;">← Adjust sliders</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§5 · Design Feasibility Ratio"></div>
+
+<!-- ===== §5 DFR ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§5 / §8</span>
+    <span class="sec-title">Design Feasibility Ratio — QALY Ceiling</span>
+    <span class="sec-tag">Macro-Economic Gate</span>
+  </div>
+  <div class="sec-desc">QALY-based cost-effectiveness frameworks are methodologically rigorous but inaccessible at design stage. The DFR translates NICE threshold logic into a calculable design-stage ceiling — not replacing full economic evaluation, but imposing economic discipline before budget is committed.</div>
+
+  <div class="formula" style="margin-bottom:14px;"><span class="hl">Max acceptable CTP</span>  = Expected QALY gain per person × Cost-effectiveness threshold
+<span class="hl">DFR</span>                  = Proposed CTP / Maximum acceptable CTP
+
+<span class="hl2">DFR < 1.0</span>   → Economically admissible
+<span class="hl">DFR ≈ 1.0</span>   → Borderline — requires strong justification
+<span class="hl3">DFR > 1.0</span>   → Economically implausible — restructure or demonstrate additional value</div>
+
+  <div class="dfr-grid">
+    <div class="dfr-card ok">
+      <div class="dfr-ratio">DFR &lt; 1.0</div>
+      <div class="dfr-interp">Economically admissible ✓</div>
+      <div class="dfr-action">Proceed subject to benchmark ratio and practicability checks. DFR &lt; 0.1 signals substantial headroom for additional investment if the behavioural case warrants it.</div>
+    </div>
+    <div class="dfr-card border-c">
+      <div class="dfr-ratio">DFR ≈ 1.0</div>
+      <div class="dfr-interp">Borderline ⚠</div>
+      <div class="dfr-action">Requires strong justification, sensitivity analysis, and risk disclosure. Re-examine QALY estimate and delivery assumptions before proceeding.</div>
+    </div>
+    <div class="dfr-card bad">
+      <div class="dfr-ratio">DFR &gt; 1.0</div>
+      <div class="dfr-interp">Economically implausible ✕</div>
+      <div class="dfr-action">Restructure design, reduce scope, or demonstrate additional value not captured in QALY estimate. Do not proceed without revision.</div>
+    </div>
+  </div>
+
+  <!-- DFR calculator -->
+
+  <div class="calc-panel" style="margin-top:14px;">
+    <div class="calc-title">DFR Calculator — synced with §0 inputs</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px;">
+      <div><label>Total budget</label><input type="number" id="dfr_budget" value="750000" oninput="calcDFR()"></div>
+      <div><label>Target population (N)</label><input type="number" id="dfr_n" value="5000" oninput="calcDFR()"></div>
+      <div><label>QALY gain per person</label><input type="number" id="dfr_qaly" value="0.10" step="0.01" oninput="calcDFR()"></div>
+      <div><label>Threshold / QALY</label><input type="number" id="dfr_nice" value="25000" oninput="calcDFR()"></div>
+      <div><label>Benchmark median</label><input type="number" id="dfr_bm" value="90" oninput="calcDFR()"></div>
+    </div>
+    <div class="dfr-out-panel" id="dfr_out">← Enter values above</div>
+  </div>
+
+  <!-- Joint signal interpretation -->
+
+  <div class="card" style="margin-top:14px;border-left:3px solid var(--teal);">
+    <div class="card-title" style="color:var(--teal2);margin-bottom:8px;">Joint Signal Interpretation</div>
+    <div style="font-size:0.82rem;color:var(--muted2);line-height:1.65;" id="joint_signal">
+      Both signals together provide more decision-relevant information than either alone. A high benchmark ratio does not make a design infeasible if the DFR is low. A low DFR does not excuse a wildly excessive benchmark ratio.
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§6 · Evidence Map"></div>
+
+<!-- ===== §6 EVIDENCE MAP ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§6 / §9</span>
+    <span class="sec-title">Evidence Map — Source Mapping</span>
+    <span class="sec-tag">Table 5 · Evidential Claims</span>
+  </div>
+  <div class="sec-desc">The article's originality is limited to three elements: the sequencing argument, the DFR translation, and the CTP benchmark table. All underlying methods already exist in the literature — the contribution is resequencing and connection.</div>
+
+  <div class="ev-list">
+    <div class="ev-row">
+      <div><div class="ev-badge cited">Cited Literature</div><div class="ev-source">Ingredients Method<span class="ev-src-author">Levin (1975); Levin et al. (2018)</span></div></div>
+      <div class="ev-col">Full economic costing of all resources required to replicate a programme effect, valued at opportunity cost</div>
+      <div class="ev-col">Defines what CTP must include. Establishes that budgets alone are insufficient cost estimates.</div>
+    </div>
+    <div class="ev-row">
+      <div><div class="ev-badge cited">Cited Literature</div><div class="ev-source">Cost-Feasibility Analysis<span class="ev-src-author">Levin et al. (2018)</span></div></div>
+      <div class="ev-col">Comparison of intervention cost estimates against available budget prior to design commitment</div>
+      <div class="ev-col">Provides the recognised methodology for the budget-anchor step proposed in this article.</div>
+    </div>
+    <div class="ev-row">
+      <div><div class="ev-badge cited">Cited Literature</div><div class="ev-source">Prospective Cost Analysis<span class="ev-src-author">Crowley, in NAS (2014)</span></div></div>
+      <div class="ev-col">Cost analysis conducted at the start of a programme, not retrospectively</div>
+      <div class="ev-col">Supports sequencing argument: cost logic must precede, not follow, design expansion.</div>
+    </div>
+    <div class="ev-row">
+      <div><div class="ev-badge cited">Cited Literature</div><div class="ev-source">BCW Functions × ICER<span class="ev-src-author">Brookes et al. (2019; 2022)</span></div></div>
+      <div class="ev-col">Empirical analysis of associations between BCW intervention functions and cost-effectiveness ratios across 79–251 interventions</div>
+      <div class="ev-col">Provides empirical basis for claim that different intervention functions carry different cost-effectiveness profiles.</div>
+    </div>
+    <div class="ev-row">
+      <div><div class="ev-badge cited">Cited Literature</div><div class="ev-source">NICE QALY Threshold<span class="ev-src-author">NICE (2013; updated 2025)</span></div></div>
+      <div class="ev-col">NICE reference threshold 20,000–30,000 per QALY in standard appraisal practice</div>
+      <div class="ev-col">Provides the traceable upper-order threshold translated into design-stage ceiling via the DFR formula.</div>
+    </div>
+    <div class="ev-row" style="border-left:3px solid var(--gold)">
+      <div><div class="ev-badge synthesis">Author's Synthesis</div><div class="ev-source">CTP Benchmark Table<span class="ev-src-author">Kartashov (2026) — Table 1</span></div></div>
+      <div class="ev-col">Indicative benchmark ranges by complexity level. Level 2–3 partially grounded in published data; Level 1 and 4 are structural extrapolations.</div>
+      <div class="ev-col">Requires empirical validation against systematically assembled programme cost data. Design-stage orientation only.</div>
+    </div>
+    <div class="ev-row" style="border-left:3px solid var(--orange)">
+      <div><div class="ev-badge heuristic">Working Heuristic</div><div class="ev-source">Decision Bands — Table 2<span class="ev-src-author">Kartashov (2026)</span></div></div>
+      <div class="ev-col">0.6–1.3× bands are proposed working heuristics for design-stage screening</div>
+      <div class="ev-col">Not empirically calibrated. Provisional reference points pending validation against programme data.</div>
+    </div>
+    <div class="ev-row" style="border-left:3px solid var(--purple)">
+      <div><div class="ev-badge heuristic">Structural Analogue</div><div class="ev-source">Transfer Decay Model<span class="ev-src-author">Based on Shepard (1987)</span></div></div>
+      <div class="ev-col">Exponential decay of transfer probability as a function of contextual distance between intervention setting and target-use context</div>
+      <div class="ev-col">Used as a structural analogue — not a direct mathematical application. Provides a formal rationale for the transfer assessment step.</div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§7 · BPMS–DREFS Runtime Architecture"></div>
+
+<!-- ===== §7 BPMS-DREFS ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§7 / §12</span>
+    <span class="sec-title">BPMS–DREFS — Runtime Architecture</span>
+    <span class="sec-tag">Table 6 · AISA 11.1</span>
+  </div>
+  <div class="sec-desc">AISA 11.1 operationalises the framework as an implementation layer. BPMS groups the core behaviour-design space; DREFS operationalises the intervention-gap layer. The DREFS layer makes intervention-level failures a distinct analytical target rather than folding them into subject diagnosis.</div>
+
+  <div class="bpms-wrap">
+    <span class="layer-pill blue-l">BPMS — Behaviour Design Space</span>
+    <span class="layer-pill purple-l">DREFS — Intervention Gap Layer</span>
+  </div>
+
+  <div class="bpms-grid" id="bpms_grid"></div>
+
+  <!-- BPMS-DREFS connection to gaps -->
+
+  <div class="card" style="margin-top:14px;border-left:3px solid var(--blue);">
+    <div class="card-title" style="margin-bottom:8px;">Mapping to Gap Types</div>
+    <div style="font-size:0.8rem;color:var(--muted2);line-height:1.65;">
+      <strong style="color:var(--blue2);">BPMS</strong> maps to <strong style="color:var(--text);">Gap 1</strong> (Behaviour) and <strong style="color:var(--text);">Gap 2</strong> (Intervention Design) — it defines the target action and the design space in which COM-B/TDF diagnosis operates.
+      <br><br>
+      <strong style="color:var(--purple2);">DREFS</strong> maps to <strong style="color:var(--text);">Gap 2</strong> (Intervention Design) specifically — Dose, Reach, Engagement, Fidelity, and Schedule represent the five dimensions along which an intervention can fail to produce its intended effect even when the BCT is theoretically appropriate.
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§8 · Worked Example"></div>
+
+<!-- ===== §8 WORKED EXAMPLE ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§8 / §8.3</span>
+    <span class="sec-title">Worked Example — Smoking Cessation Programme</span>
+    <span class="sec-tag">Complete Walkthrough</span>
+  </div>
+  <div class="sec-desc">Demonstrates the full cost-anchored evaluation sequence: CTP calculation → benchmark comparison → DFR validation. Both signals together provide more decision-relevant information than either alone.</div>
+
+  <div class="we-panel">
+    <div class="we-list">
+      <div class="we-item">
+        <div class="we-num">1</div>
+        <div>
+          <div class="we-lbl">Programme Parameters</div>
+          <div class="we-calc">Target population: 5,000 people
+Total full-loaded budget: 750,000
+Programme duration: 12 months</div>
+        </div>
+      </div>
+      <div class="we-item">
+        <div class="we-num">2</div>
+        <div>
+          <div class="we-lbl">CTP Calculation</div>
+          <div class="we-calc">CTP = 750,000 / 5,000 = <strong style="color:var(--gold2)">150 per person</strong></div>
+          <div class="we-note">→ Level 2 (Standard / Moderate-intensity). Indicative median: 90</div>
+        </div>
+      </div>
+      <div class="we-item">
+        <div class="we-num">3</div>
+        <div>
+          <div class="we-lbl">Benchmark Ratio</div>
+          <div class="we-calc">Ratio = 150 / 90 = <strong style="color:var(--gold2)">1.67×</strong></div>
+          <div class="verdict gold">⚠ 1.3–2.0× band: expensive but possibly justified. Requires delivery rationale.</div>
+        </div>
+      </div>
+      <div class="we-item">
+        <div class="we-num">4</div>
+        <div>
+          <div class="we-lbl">DFR Calculation (QALY-derived ceiling)</div>
+          <div class="we-calc">QALY gain per person: 0.10 (illustrative, conservative)
+Threshold: 25,000 per QALY
+Max acceptable CTP = 0.10 × 25,000 = 2,500
+DFR = 150 / 2,500 = <strong style="color:var(--green2)">0.06</strong></div>
+          <div class="verdict green">✓ DFR = 0.06 — substantial headroom beneath QALY-derived ceiling</div>
+        </div>
+      </div>
+      <div class="we-item">
+        <div class="we-num">5</div>
+        <div>
+          <div class="we-lbl">Transfer Assessment</div>
+          <div class="we-calc">Setting: GP clinic → home / community
+Social support: facilitated group → solo self-management
+Cue availability: structured session → real-world triggers</div>
+          <div class="we-note">→ Moderate contextual distance. Bridging elements required: SMS prompts, peer check-ins, app-based cue substitution.</div>
+        </div>
+      </div>
+      <div class="we-item">
+        <div class="we-num">6</div>
+        <div>
+          <div class="we-lbl">Joint Signal Interpretation</div>
+          <div style="font-size:0.82rem;line-height:1.65;">Benchmark ratio <strong style="color:var(--gold2);">1.67×</strong> flags that the design is expensive relative to median — delivery justification required. DFR <strong style="color:var(--green2);">0.06</strong> confirms that the design is economically admissible by a substantial margin. Transfer risk is <strong style="color:var(--gold2);">moderate</strong> — bridging elements identified. Together: <strong style="color:var(--text);">proceed with delivery justification</strong>, not infeasible.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="§9 · Implications"></div>
+
+<!-- ===== §9 IMPLICATIONS ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">§9 / §10</span>
+    <span class="sec-title">Implications for Design Practice</span>
+    <span class="sec-tag">4 Actions</span>
+  </div>
+  <div class="sec-desc">If the argument is accepted, four practical implications follow for any BCW-based design process.</div>
+
+  <div class="impl-grid">
+    <div class="impl-card" style="--c:var(--gold)">
+      <style>.impl-card:nth-child(1)::before{background:var(--gold)}.impl-card:nth-child(2)::before{background:var(--blue)}.impl-card:nth-child(3)::before{background:var(--purple)}.impl-card:nth-child(4)::before{background:var(--green)}</style>
+      <div class="impl-n">Implication 1</div>
+      <div class="impl-title" style="color:var(--gold2)">Cost-Feasibility First Step</div>
+      <div class="impl-body">Any BCW-based design process should begin with a cost-feasibility step: calculate CTP, compare to benchmark ranges, derive the benchmark ratio, and constrain the function search space before COM-B/TDF diagnosis begins. This adds one step at the start and removes potentially many at APEASE.</div>
+    </div>
+    <div class="impl-card">
+      <div class="impl-n">Implication 2</div>
+      <div class="impl-title" style="color:var(--blue2)">Explicit Gate in BCW Guidance</div>
+      <div class="impl-body">Any BCW-based design framework — published guide, software tool, or internal methodology — should incorporate an explicit cost-feasibility gate at the opening of the design sequence. The BCW book does not currently specify this. Adding it would align BCW practice with established cost analysis methodology.</div>
+    </div>
+    <div class="impl-card">
+      <div class="impl-n">Implication 3</div>
+      <div class="impl-title" style="color:var(--purple2)">DFR as Standard Check</div>
+      <div class="impl-body">The DFR should be calculated as a standard check whenever QALY estimates are available for the target behaviour. It requires only a literature-based QALY estimate and the current threshold. Both are accessible at design stage for most established behaviour change targets.</div>
+    </div>
+    <div class="impl-card">
+      <div class="impl-n">Implication 4</div>
+      <div class="impl-title" style="color:var(--green2)">Treat CTP as Diagnostic Tool</div>
+      <div class="impl-body">A benchmark ratio above 1.3× is not a reason to abandon a design — it is a prompt to examine why the unit cost is high and whether the expected value justifies it. A DFR below 0.1 signals substantial headroom for additional investment if the behavioural case warrants it.</div>
+    </div>
+  </div>
+</div>
+
+<div class="div" data-label="Framework Overview"></div>
+
+<!-- ===== FRAMEWORK OVERVIEW ===== -->
+
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">Σ</span>
+    <span class="sec-title">Framework Overview — Connections</span>
+    <span class="sec-tag">Integration</span>
+  </div>
+  <div class="sec-desc">How the components relate. Each element feeds into the next; the two quantitative gates (benchmark ratio and DFR) act as independent checks on the same design decision.</div>
+
+  <div class="card" style="overflow-x:auto;">
+    <div style="min-width:700px;padding:10px 0;">
+      <!-- Row 1 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:600;color:var(--gold2);min-width:130px;text-align:center;">Budget + N<br><span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)">Given at commission</span></div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:500;min-width:110px;text-align:center;font-family:'JetBrains Mono',monospace;">CTP = B / N</div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:500;min-width:130px;text-align:center;font-family:'JetBrains Mono',monospace;">Ratio = CTP / BM</div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:rgba(77,184,122,0.08);border:1px solid rgba(77,184,122,0.25);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:600;color:var(--green2);min-width:130px;text-align:center;">Gate 1<br><span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;">0.6–1.3× band?</span></div>
+      </div>
+      <!-- Row 2 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div style="background:rgba(155,107,212,0.08);border:1px solid rgba(155,107,212,0.25);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:600;color:var(--purple2);min-width:130px;text-align:center;">QALY + Threshold<br><span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)">Literature-based</span></div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:500;min-width:130px;text-align:center;font-family:'JetBrains Mono',monospace;">Max CTP = Q × T</div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:500;min-width:110px;text-align:center;font-family:'JetBrains Mono',monospace;">DFR = CTP / Max</div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:rgba(77,184,122,0.08);border:1px solid rgba(77,184,122,0.25);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:600;color:var(--green2);min-width:130px;text-align:center;">Gate 2<br><span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;">DFR &lt; 1.0?</span></div>
+      </div>
+      <!-- Row 3 -->
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="background:rgba(91,155,213,0.08);border:1px solid rgba(91,155,213,0.25);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:600;color:var(--blue2);min-width:130px;text-align:center;">Programme context<br><span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)">vs. target setting</span></div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:500;min-width:130px;text-align:center;font-family:'JetBrains Mono',monospace;">Distance = Σ dims</div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:500;min-width:110px;text-align:center;font-family:'JetBrains Mono',monospace;">P(transfer) = e^-kd</div>
+        <div style="color:var(--muted);font-size:0.8rem;">→</div>
+        <div style="background:rgba(155,107,212,0.08);border:1px solid rgba(155,107,212,0.25);border-radius:6px;padding:10px 14px;font-size:0.78rem;font-weight:600;color:var(--purple2);min-width:130px;text-align:center;">Gate 3<br><span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;">Bridge or redesign?</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+
+<footer>
+  <div><strong>Oleksii Kartashov</strong> · Budget Before Diagnosis · Working Paper 2026 · <a href="https://chatgpt.com/g/g-69a6ab4b5adc81919a5be72eecbd2f81-aisa-11-1" target="_blank">BOT AISA 11.1</a> · <a href="https://doi.org/10.5281/zenodo.19388359" target="_blank">Zenodo DOI</a></div>
+  <div style="color:var(--muted);">Visualisation tool — not a substitute for reading the full paper</div>
+</footer>
+
+</div><!-- /wrap -->
+
+<script>
+// ===== DATA =====
+const BM_DATA = [
+  { level:1, type:'Simple / mass / low-intensity', examples:'Social norms campaigns, nudge mailers, digital prompts', low:2, median:8, high:25, color:'#5b9bd5', interp:'Near-zero marginal delivery cost. Suited to population-level reach.' },
+  { level:2, type:'Standard / moderate-intensity', examples:'Brief interventions, group education, app-based coaching', low:30, median:90, high:250, color:'#4db87a', interp:'Moderate facilitation cost. Suited to primary care, workplace, community.' },
+  { level:3, type:'Complex / multi-component', examples:'Multi-session programmes, case management, blended delivery', low:280, median:600, high:1400, color:'#d4a843', interp:'High coordination cost. Requires strong expected-value justification.' },
+  { level:4, type:'Bespoke / pilot-heavy', examples:'Intensive clinical programmes, individualised coaching, novel models', low:1500, median:3500, high:10000, color:'#c45c84', interp:'Innovation premium + evaluation overhead. Justified only where evidence gap is large.' },
+];
+
+const CL_DATA = [
+  { n:'Gap 1', where:'Behaviour Gap', color:'#5b9bd5', q:'"What is wrong in capability, opportunity, or motivation?"', fw:'COM-B / TDF', corr:'Subject correction: education, training, enablement, persuasion' },
+  { n:'Gap 2', where:'Intervention Design Gap', color:'#4db87a', q:'"What is wrong in dose, reach, engagement, fidelity, or schedule?"', fw:'BCW design logic', corr:'Intervention correction: redesign delivery structure, mode, or schedule' },
+  { n:'Gap 3', where:'Transfer Gap', color:'#9b6bd4', q:'"Will the activated mechanism generalise to the real-world setting?"', fw:'Shepard-type analogue', corr:'Transfer correction: bridge contextual features or redesign for transfer resilience' },
+  { n:'Gap 4', where:'System Gap', color:'#d4834b', q:'"Is the system rewarding the wrong outcome or structuring the wrong pathway?"', fw:'APEASE / policy logic', corr:'System correction: realign incentives, metrics, or procurement logic' },
+  { n:'Gap 5', where:'Economic-Operability Gap', color:'#d4a843', q:'"Is the design fundable and scalable within the available envelope?"', fw:'CTP / DFR', corr:'Economic correction: reduce scope, simplify delivery, or restructure financing' },
+];
+
+const BPMS_DATA = [
+  { letter:'B', mod:'Behaviour, BCT', meaning:'Behaviour defines the target action; BCT defines the smallest active intervention content unit', q:'What behaviour is to be changed, and what active technique is being used?', layer:'blue-l' },
+  { letter:'P', mod:'Population', meaning:'Person, group, or role expected to perform the behaviour', q:'In whom or by whom is the target behaviour expected?', layer:'blue-l' },
+  { letter:'M', mod:'Mechanisms of Action, Mode of Delivery', meaning:'MoA specifies how change is expected to occur; Mode specifies how the intervention is transmitted', q:'Through what mechanism, and through what delivery mode?', layer:'blue-l' },
+  { letter:'S', mod:'Setting, Source, Style', meaning:'Setting: context; Source: who delivers; Style: how content is framed', q:'In what context, by whom, and in what style does the intervention operate?', layer:'blue-l' },
+  { letter:'D', mod:'Dose', meaning:'Amount, intensity, or quantity of intervention exposure', q:'Was the amount of intervention sufficient?', layer:'purple-l' },
+  { letter:'R', mod:'Reach', meaning:'Extent to which the intervention reaches the intended population or context', q:'Did the intervention reach who and where it needed to?', layer:'purple-l' },
+  { letter:'E', mod:'Engagement', meaning:'Active participant interaction with relevant intervention elements', q:'Did participants meaningfully engage with the intervention?', layer:'purple-l' },
+  { letter:'F', mod:'Fidelity', meaning:'Degree to which delivery occurred as intended without drift', q:'Was the intervention delivered as designed?', layer:'purple-l' },
+  { letter:'S', mod:'Schedule', meaning:'Temporal organisation: timing, frequency, sequencing, and spacing', q:'Was the intervention delivered at the right time, in the right sequence, with the right spacing?', layer:'purple-l' },
+];
+
+const TD_DIMS = [
+  { id:'td_setting', label:'Setting similarity', hint:'0 = identical, 10 = completely different' },
+  { id:'td_cues', label:'Cue availability', hint:'0 = all cues present, 10 = none present' },
+  { id:'td_social', label:'Social support', hint:'0 = equivalent, 10 = absent in target' },
+  { id:'td_time', label:'Time gap to behaviour', hint:'0 = immediate, 10 = long gap' },
+];
+
+// ===== BUILD BM GRID =====
+function buildBMGrid() {
+  document.getElementById('bm_grid').innerHTML = BM_DATA.map(d => {
+    const pLow = (Math.log(d.low+1)/Math.log(d.high+1)*100).toFixed(1);
+    const pMed = (Math.log(d.median+1)/Math.log(d.high+1)*100).toFixed(1);
+    return `<div class="bm-card" style="border-top:3px solid ${d.color}">
+      <div class="bm-level">Level ${d.level}</div>
+      <div class="bm-type" style="color:${d.color}">${d.type}</div>
+      <div class="bm-examples">${d.examples}</div>
+      <div class="bm-range">
+        <span class="bm-lo">${d.low}</span>
+        <span class="bm-med" style="color:${d.color}">${d.median.toLocaleString()}</span>
+        <span class="bm-hi">${d.high.toLocaleString()}+</span>
+      </div>
+      <div class="bm-bar">
+        <div class="bm-bar-fill" style="left:${pLow}%;right:0;background:${d.color}"></div>
+        <div class="bm-bar-tick" style="left:${pMed}%;background:${d.color}"></div>
+      </div>
+      <div class="bm-interp">${d.interp}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== BUILD CL GRID =====
+function buildCLGrid() {
+  document.getElementById('cl_grid').innerHTML = CL_DATA.map(d =>
+    `<div class="cl-card" style="border-left:3px solid ${d.color}">
+      <div class="cl-type" style="color:${d.color}">${d.n}</div>
+      <div class="cl-where">${d.where}</div>
+      <div class="cl-q">${d.q}</div>
+      <div class="cl-fw">${d.fw}</div>
+      <div class="cl-corr">${d.corr}</div>
+    </div>`
+  ).join('');
+}
+
+// ===== BUILD GAP FLOW =====
+function buildGapFlow() {
+  const items = [
+    { q:'Is the target behaviour absent or insufficient?', path:'→ Gap 1: Behaviour. Use COM-B / TDF diagnosis.', color:'var(--blue2)' },
+    { q:'If behaviour is capable but intervention does not work: Dose, Reach, Fidelity, Engagement, or Schedule issue?', path:'→ Gap 2: Intervention Design. Use DREFS assessment.', color:'var(--green2)' },
+    { q:'If intervention works in programme but not in real world: contextual distance issue?', path:'→ Gap 3: Transfer Gap. Use Shepard-type distance assessment.', color:'var(--purple2)' },
+    { q:'If problem is structural incentives or procurement logic rather than individual or intervention?', path:'→ Gap 4: System Gap. Escalate to policy / commissioning level.', color:'var(--orange2)' },
+    { q:'If the design is behaviourally valid but cannot be funded or scaled at this budget?', path:'→ Gap 5: Economic-Operability. Recalculate CTP / DFR.', color:'var(--gold2)' },
+  ];
+  document.getElementById('gap_flow').innerHTML = items.map((it,i) =>
+    `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)${i===items.length-1?';border-bottom:none':''}">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);flex-shrink:0;margin-top:2px">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:0.78rem;font-style:italic;color:var(--muted2);margin-bottom:4px;">${it.q}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:${it.color};">${it.path}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ===== BUILD BPMS GRID =====
+function buildBPMS() {
+  document.getElementById('bpms_grid').innerHTML = BPMS_DATA.map(d =>
+    `<div class="bpms-card ${d.layer}">
+      <div class="bpms-letter">${d.letter}</div>
+      <div>
+        <div class="bpms-mod">${d.mod}</div>
+        <div class="bpms-meaning">${d.meaning}</div>
+        <div class="bpms-q"><em>"${d.q}"</em></div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ===== BUILD TRANSFER SLIDERS =====
+function buildTDSliders() {
+  document.getElementById('td_sliders').innerHTML = TD_DIMS.map(d =>
+    `<div class="slider-group">
+      <label>${d.label}</label>
+      <div class="slider-row">
+        <input type="range" id="${d.id}" min="0" max="10" value="5" oninput="calcTD()">
+        <span class="slider-val" id="${d.id}_val">5</span>
+      </div>
+      <div class="slider-hint">${d.hint}</div>
+    </div>`
+  ).join('');
+}
+
+// ===== CALC TD =====
+function calcTD() {
+  let sum = 0;
+  TD_DIMS.forEach(d => {
+    const v = +document.getElementById(d.id).value;
+    document.getElementById(d.id+'_val').textContent = v;
+    sum += v;
+  });
+  const avg = sum / TD_DIMS.length;
+  const transferP = Math.exp(-3.5 * avg / 10);
+  const risk = avg < 3 ? '✓ Low' : avg < 6 ? '⚠ Moderate' : '✕ High';
+  const color = avg < 3 ? 'var(--green2)' : avg < 6 ? 'var(--gold2)' : 'var(--red2)';
+  document.getElementById('td_result').innerHTML =
+    `Aggregate distance:   <strong style="color:${color}">${avg.toFixed(1)} / 10</strong>
+Transfer probability: <strong style="color:${color}">${(transferP*100).toFixed(0)}%</strong>
+Transfer risk:        <strong style="color:${color}">${risk}</strong>
+
+${avg>=6?'Flag for transfer redesign before delivery investment is committed.':avg>=3?'Identify bridging elements for absent contextual features.':'High contextual similarity — transfer risk is low.'}`;
+  // redraw canvas indicator
+  drawShepard(avg / 10);
+}
+
+// ===== SHEPARD CANVAS =====
+function drawShepard(markerPos) {
+  const canvas = document.getElementById('shepCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = '#0f1118'; ctx.fillRect(0,0,W,H);
+
+  const pad = {l:54,r:24,t:28,b:48};
+  const gW = W-pad.l-pad.r, gH = H-pad.t-pad.b;
+  const k = 3.5;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+  for(let i=0;i<=4;i++){
+    const x = pad.l+gW*i/4; ctx.beginPath(); ctx.moveTo(x,pad.t); ctx.lineTo(x,pad.t+gH); ctx.stroke();
+    const y = pad.t+gH*i/4; ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+gW,y); ctx.stroke();
+  }
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(pad.l,0,pad.l+gW,0);
+  grad.addColorStop(0,'rgba(77,184,122,0.15)');
+  grad.addColorStop(1,'rgba(196,92,92,0.08)');
+
+  ctx.beginPath();
+  for(let i=0;i<=300;i++){
+    const t=i/300;
+    const x=pad.l+t*gW;
+    const y=pad.t+gH*(1-Math.exp(-k*t));
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.lineTo(pad.l+gW,pad.t+gH); ctx.lineTo(pad.l,pad.t+gH); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Curve
+  ctx.beginPath(); ctx.strokeStyle='#9b6bd4'; ctx.lineWidth=2.5;
+  for(let i=0;i<=300;i++){
+    const t=i/300;
+    const x=pad.l+t*gW;
+    const y=pad.t+gH*(1-Math.exp(-k*t));
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Y-axis
+  ctx.fillStyle='#5d6480'; ctx.font='9px JetBrains Mono,monospace'; ctx.textAlign='right';
+  ['1.0','0.75','0.5','0.25','0.0'].forEach((v,i)=>{
+    const y=pad.t+gH*i/4;
+    ctx.fillText(v,pad.l-6,y+3);
+  });
+
+  // X labels
+  ctx.textAlign='center';
+  ['Low','Moderate','High','Very High'].forEach((v,i)=>{
+    ctx.fillText(v,pad.l+gW*(i+1)/4,pad.t+gH+18);
+  });
+
+  // Axis titles
+  ctx.fillStyle='#5d6480'; ctx.font='9px JetBrains Mono,monospace';
+  ctx.fillText('Contextual Distance',pad.l+gW/2,H-6);
+  ctx.save(); ctx.translate(12,pad.t+gH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('Transfer Probability',0,0); ctx.restore();
+
+  // Zone labels
+  ctx.font='9px JetBrains Mono,monospace'; ctx.textAlign='left';
+  ctx.fillStyle='rgba(77,184,122,0.8)'; ctx.fillText('High transfer',pad.l+4,pad.t+14);
+  ctx.fillStyle='rgba(196,92,92,0.7)'; ctx.fillText('Low transfer',pad.l+gW-70,pad.t+gH-12);
+
+  // Origin point
+  ctx.beginPath(); ctx.arc(pad.l,pad.t,5,0,Math.PI*2);
+  ctx.fillStyle='#4db87a'; ctx.fill();
+
+  // Marker for current slider position
+  if(markerPos !== undefined){
+    const mx = pad.l+markerPos*gW;
+    const my = pad.t+gH*(1-Math.exp(-k*markerPos));
+    ctx.beginPath(); ctx.arc(mx,my,6,0,Math.PI*2);
+    const col = markerPos<0.3?'#4db87a':markerPos<0.6?'#d4a843':'#c45c5c';
+    ctx.fillStyle=col; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+}
+
+// ===== BENCHMARK RATIO =====
+function calcBR() {
+  const ctp = +document.getElementById('br_ctp').value||1;
+  const bm = +document.getElementById('br_level').value||1;
+  const ratio = ctp/bm;
+  let band, color;
+  if(ratio<0.6){band='< 0.6× — Suspiciously cheap. Check for missing overhead.';color='var(--orange2)';}
+  else if(ratio<=1.3){band='0.6–1.3× — Within benchmark band ✓ Proceed.';color='var(--green2)';}
+  else if(ratio<=2.0){band='1.3–2.0× — Expensive. Redesign or justify explicitly.';color='var(--gold2)';}
+  else{band='> 2.0× — Structurally too expensive. No-go or major redesign.';color='var(--red2)';}
+  document.getElementById('br_result').innerHTML =
+    `Our CTP:   <strong style="color:var(--gold2)">${ctp}</strong>
+Benchmark: <strong>${bm} (median)</strong>
+Ratio:     <strong style="color:${color}">${ratio.toFixed(2)}×</strong>
+<span style="color:${color}">${band}</span>`;
+}
+
+// ===== DFR CALC =====
+function calcDFR() {
+  const budget = +document.getElementById('dfr_budget').value||0;
+  const n = +document.getElementById('dfr_n').value||1;
+  const qaly = +document.getElementById('dfr_qaly').value||0;
+  const nice = +document.getElementById('dfr_nice').value||25000;
+  const bm = +document.getElementById('dfr_bm').value||1;
+  const ctp = budget/n;
+  const maxCTP = qaly*nice;
+  const dfr = maxCTP>0?ctp/maxCTP:null;
+  const ratio = ctp/bm;
+  const dfrLabel = dfr===null?'—':dfr<1?'✓ Economically admissible':dfr<1.1?'⚠ Borderline — requires justification':'✕ Economically implausible';
+  const dfrColor = dfr===null?'var(--muted2)':dfr<1?'var(--green2)':dfr<1.1?'var(--gold2)':'var(--red2)';
+  document.getElementById('dfr_out').innerHTML =
+    `<span class="hi">CTP             </span>= ${budget.toLocaleString()} ÷ ${n.toLocaleString()} = <strong style="color:var(--gold2)">${ctp.toFixed(0)}</strong>
+<span class="hi">Max CTP (QALY)  </span>= ${qaly} × ${nice.toLocaleString()} = <strong>${maxCTP.toLocaleString()}</strong>
+<span class="hi">DFR             </span>= ${ctp.toFixed(0)} ÷ ${maxCTP.toLocaleString()} = <strong style="color:${dfrColor}">${dfr!==null?dfr.toFixed(3):'—'}</strong>
+<strong style="color:${dfrColor}">${dfrLabel}</strong>
+────────────────────────────────────────
+<span class="hi">Benchmark ratio </span>= ${ctp.toFixed(0)} ÷ ${bm} = ${ratio.toFixed(2)}×`;
+}
+
+// ===== §0 RECALC ALL =====
+function recalcAll() {
+  const budget = +document.getElementById('p_budget').value||0;
+  const n = +document.getElementById('p_n').value||1;
+  const bm = +document.getElementById('p_bm').value||1;
+  const qaly = +document.getElementById('p_qaly').value||0;
+  const nice = +document.getElementById('p_nice').value||25000;
+  const months = +document.getElementById('p_months').value||12;
+
+  const ctp = budget/n;
+  const ratio = ctp/bm;
+  const maxCTP = qaly*nice;
+  const dfr = maxCTP>0?ctp/maxCTP:null;
+  const perMonth = budget/Math.max(months,1);
+  const costPerQALY = qaly>0?ctp/qaly:null;
+
+  const ratioClass = ratio<0.6?'red':ratio<=1.3?'green':ratio<=2?'':' red';
+  const dfrClass = dfr===null?'blue':dfr<1?'green':'red';
+
+  document.getElementById('param_out').innerHTML = [
+    {lbl:'CTP — Cost per Target Person', val: ctp.toFixed(0), cls:''},
+    {lbl:'Benchmark Ratio', val: ratio.toFixed(2)+'×', cls: ratio<0.6?'red':ratio<=1.3?'green':'red'},
+    {lbl:'Design Feasibility Ratio', val: dfr!==null?dfr.toFixed(3):'—', cls: dfrClass},
+    {lbl:'Max Acceptable CTP (QALY)', val: maxCTP.toLocaleString(), cls:'blue'},
+    {lbl:'Monthly spend', val: Math.round(perMonth).toLocaleString(), cls:''},
+    {lbl:'Total budget', val: budget.toLocaleString(), cls:''},
+    {lbl:'Target reach', val: n.toLocaleString(), cls:''},
+    {lbl:'Cost per QALY gained', val: costPerQALY!==null?Math.round(costPerQALY).toLocaleString():'—', cls:'purple'},
+  ].map(o=>`<div class="param-out ${o.cls}">
+    <div class="lbl">${o.lbl}</div>
+    <div class="val">${o.val}</div>
+  </div>`).join('');
+
+  // Calculation chain
+  const nodeStyle = 'background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:0.75rem;font-weight:500;text-align:center;flex:1;min-width:90px;';
+  const resultStyle = 'background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-family:JetBrains Mono,monospace;font-size:0.78px;white-space:nowrap;font-size:0.75rem;';
+  const arrow = '<div style="color:var(--muted);padding:0 6px;font-size:0.8rem;">→</div>';
+  const op = (t)=>`<div style="font-family:JetBrains Mono,monospace;font-size:0.68rem;color:var(--gold);padding:0 4px;">${t}</div>`;
+
+  function chain(id, parts){ document.getElementById(id).innerHTML = parts.join(''); }
+  chain('chain_ctp', [
+    `<div style="${nodeStyle}">Budget<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--gold2)">${budget.toLocaleString()}</span></div>`,
+    op('÷'), `<div style="${nodeStyle}">N<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--gold2)">${n.toLocaleString()}</span></div>`,
+    arrow,
+    `<div style="${resultStyle};color:var(--gold2);border-color:rgba(212,168,67,0.3)"><span style="color:var(--muted)">CTP = </span>${ctp.toFixed(0)} per person</div>`
+  ]);
+  const ratioColor = ratio<0.6?'var(--orange2)':ratio<=1.3?'var(--green2)':ratio<=2?'var(--gold2)':'var(--red2)';
+  chain('chain_ratio', [
+    `<div style="${nodeStyle}">CTP<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--gold2)">${ctp.toFixed(0)}</span></div>`,
+    op('÷'), `<div style="${nodeStyle}">Benchmark<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--gold2)">${bm}</span></div>`,
+    arrow,
+    `<div style="${resultStyle};color:${ratioColor};border-color:${ratioColor}33"><span style="color:var(--muted)">Ratio = </span>${ratio.toFixed(2)}×</div>`
+  ]);
+  chain('chain_maxctp', [
+    `<div style="${nodeStyle}">QALY gain<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--purple2)">${qaly}</span></div>`,
+    op('×'), `<div style="${nodeStyle}">Threshold<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--purple2)">${nice.toLocaleString()}</span></div>`,
+    arrow,
+    `<div style="${resultStyle};color:var(--purple2);border-color:rgba(155,107,212,0.3)"><span style="color:var(--muted)">Max CTP = </span>${maxCTP.toLocaleString()}</div>`
+  ]);
+  const dfrColor2 = dfr===null?'var(--muted)':dfr<1?'var(--green2)':dfr<1.1?'var(--gold2)':'var(--red2)';
+  chain('chain_dfr', [
+    `<div style="${nodeStyle}">CTP<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--gold2)">${ctp.toFixed(0)}</span></div>`,
+    op('÷'), `<div style="${nodeStyle}">Max CTP<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--purple2)">${maxCTP.toLocaleString()}</span></div>`,
+    arrow,
+    `<div style="${resultStyle};color:${dfrColor2};border-color:${dfrColor2}33"><span style="color:var(--muted)">DFR = </span>${dfr!==null?dfr.toFixed(3):'—'}</div>`
+  ]);
+  chain('chain_qaly_pp', [
+    `<div style="${nodeStyle}">CTP<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--gold2)">${ctp.toFixed(0)}</span></div>`,
+    op('÷'), `<div style="${nodeStyle}">QALY gain<br><span style="font-family:JetBrains Mono,monospace;font-size:0.65rem;color:var(--purple2)">${qaly}</span></div>`,
+    arrow,
+    `<div style="${resultStyle};color:var(--purple2);border-color:rgba(155,107,212,0.25)"><span style="color:var(--muted)">Cost / QALY = </span>${costPerQALY!==null?Math.round(costPerQALY).toLocaleString():'—'}</div>`
+  ]);
+
+  // Sync DFR calc
+  document.getElementById('dfr_budget').value = budget;
+  document.getElementById('dfr_n').value = n;
+  document.getElementById('dfr_qaly').value = qaly;
+  document.getElementById('dfr_nice').value = nice;
+  document.getElementById('dfr_bm').value = bm;
+  calcDFR();
+
+  // Sync BR calc
+  document.getElementById('br_ctp').value = ctp.toFixed(0);
+  calcBR();
+
+  // Joint signal
+  const jointEl = document.getElementById('joint_signal');
+  if(jointEl && dfr !== null){
+    const bRatioText = ratio.toFixed(2)+'×';
+    const dfrText = dfr.toFixed(3);
+    const conclusion = (ratio<=1.3&&dfr<1)?'Both signals green — proceed subject to practicability checks.':
+      (ratio>2&&dfr>=1)?'Both signals red — major redesign required.':
+      (ratio<=1.3&&dfr>=1)?'DFR exceeds ceiling despite reasonable benchmark ratio — reassess QALY estimate or reduce CTP.':
+      (ratio>1.3&&dfr<1)?'Benchmark ratio elevated but DFR within ceiling — delivery justification required, not infeasible.':
+      'Mixed signals — review both ratios in context before proceeding.';
+    jointEl.innerHTML = `Benchmark ratio <strong style="color:${ratioColor}">${bRatioText}</strong> + DFR <strong style="color:${dfrColor2}">${dfrText}</strong>: <strong style="color:var(--text)">${conclusion}</strong>`;
+  }
+}
+
+// ===== INIT =====
+buildBMGrid();
+buildCLGrid();
+buildGapFlow();
+buildBPMS();
+buildTDSliders();
+drawShepard(0.5);
+recalcAll();
+calcBR();
+calcDFR();
+calcTD();
+</script>
+
+</body>
+</html>
